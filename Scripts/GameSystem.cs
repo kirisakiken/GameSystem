@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using KirisakiTechnologies.GameSystem.Scripts.Containers;
+using KirisakiTechnologies.GameSystem.Scripts.Factories;
 using KirisakiTechnologies.GameSystem.Scripts.Modules;
 using KirisakiTechnologies.GameSystem.Scripts.Providers;
 using KirisakiTechnologies.GameSystem.Scripts.Tools;
@@ -30,6 +31,10 @@ namespace KirisakiTechnologies.GameSystem.Scripts
 
         public IGameProvider GetOptionalProvider(Type providerType) => _GameProviders.FirstOrDefault(providerType.IsInstanceOfType);
 
+        public IGameFactory GetFactory(Type factoryType) => GetOptionalFactory(factoryType) ?? throw new InvalidOperationException($"Factory type: {factoryType.Name} not available");
+
+        public IGameFactory GetOptionalFactory(Type factoryType) => _GameFactories.FirstOrDefault(factoryType.IsInstanceOfType);
+
         public IGameTool GetTool(Type toolType) => GetOptionalTool(toolType) ?? throw new InvalidOperationException($"Tool type: {toolType.Name} not available");
 
         public IGameTool GetOptionalTool(Type toolType) => _GameTools.FirstOrDefault(toolType.IsInstanceOfType);
@@ -38,6 +43,7 @@ namespace KirisakiTechnologies.GameSystem.Scripts
         {
             _ModulesContainerCollection = GetComponentInChildren<IModulesContainerCollection>(); // TODO: ? Possible better way??
             _ProvidersContainerCollection = GetComponentInChildren<IProvidersContainerCollection>();
+            _FactoriesContainerCollection = GetComponentInChildren<IFactoriesContainerCollection>();
             _ToolsContainerCollection = GetComponentInChildren<IToolsContainerCollection>();
 
             await InitializeAndBeginSystem(this);
@@ -51,10 +57,12 @@ namespace KirisakiTechnologies.GameSystem.Scripts
 
         private IModulesContainerCollection _ModulesContainerCollection;
         private IProvidersContainerCollection _ProvidersContainerCollection;
+        private IFactoriesContainerCollection _FactoriesContainerCollection;
         private IToolsContainerCollection _ToolsContainerCollection;
 
         private readonly List<IGameModule> _GameModules = new List<IGameModule>();
         private readonly List<IGameProvider> _GameProviders = new List<IGameProvider>();
+        private readonly List<IGameFactory> _GameFactories = new List<IGameFactory>();
         private readonly List<IGameTool> _GameTools = new List<IGameTool>();
 
         private async Task InitializeAndBeginSystem(IGameSystem system)
@@ -67,6 +75,7 @@ namespace KirisakiTechnologies.GameSystem.Scripts
         {
             PopulateGameModules();
             PopulateGameProviders();
+            PopulateFactories();
             PopulateGameTools();
 
             foreach (var module in _GameModules)
@@ -74,6 +83,9 @@ namespace KirisakiTechnologies.GameSystem.Scripts
 
             foreach (var provider in _GameProviders)
                 await provider.Initialize(system);
+
+            foreach (var factory in _GameFactories)
+                await factory.Initialize(system);
 
             foreach (var tool in _GameTools)
                 await tool.Initialize(system);
@@ -86,6 +98,9 @@ namespace KirisakiTechnologies.GameSystem.Scripts
 
             foreach (var provider in _GameProviders)
                 await provider.Begin(system);
+
+            foreach (var factory in _GameFactories)
+                await factory.Begin(system);
 
             foreach (var tool in _GameTools)
                 await tool.Begin(system);
@@ -125,6 +140,18 @@ namespace KirisakiTechnologies.GameSystem.Scripts
 
             var tools = _ToolsContainerCollection.Tools;
             _GameTools.AddRange(tools);
+        }
+
+        private void PopulateFactories()
+        {
+            if (_GameFactories.Count > 0)
+                return;
+
+            if (_FactoriesContainerCollection == null)
+                throw new NullReferenceException($"{nameof(_FactoriesContainerCollection)} is not provided");
+
+            var factories = _FactoriesContainerCollection.Factories;
+            _GameFactories.AddRange(factories);
         }
 
         #endregion

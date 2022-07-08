@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using KirisakiTechnologies.GameSystem.Scripts.Entities;
-using KirisakiTechnologies.GameSystem.Scripts.Extensions;
-using KirisakiTechnologies.GameSystem.Scripts.Providers.Entities;
+
+using UnityEngine;
 
 namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 {
@@ -12,27 +14,60 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
     {
         #region IEntitiesModule Implementation
 
-        public IReadOnlyList<IEntity> Entities => _Entities;
+        public event OnEntitiesChanged OnEntitiesChanged;
 
-        #endregion
-
-        #region Overrides
-
-        public override async Task Begin(IGameSystem gameSystem)
+        public T GetEntity<T>(int id) where T : IEntity
         {
-            _EntitiesProvider = gameSystem.GetProvider<IEntitiesProvider>();
-            _Entities.AddRange(await _EntitiesProvider.LoadEntities());
+            return _Entities.FirstOrDefault((e) => e.Id == id) is T t
+                ? t
+                : default;
+        }
 
-            await base.Begin(gameSystem);
+        public int GetNextEntityId()
+        {
+            if (_Entities.Count == 0)
+                return 1;
+
+            var id = _Entities.Max((e) => e.Id);
+            return id + 1;
+        }
+
+        public Task UpdateEntities(EntitiesTransaction transaction)
+        {
+            foreach (var entity in transaction.AddedEntities)
+            {
+                if (!_Entities.Add(entity))
+                {
+                    Debug.LogWarning($"Entity with id: {entity.Id} already exists in the module collection!");
+                    continue;
+                }
+            }
+
+            foreach (var entity in transaction.ModifiedEntities)
+            {
+                throw new NotImplementedException();
+            }
+
+            foreach (var entity in transaction.RemovedEntities)
+            {
+                if (!_Entities.Contains(entity))
+                {
+                    Debug.LogWarning($"Unable to find Entity with id: {entity.Id}!");
+                    continue;
+                }
+
+                _Entities.Remove(entity);
+            }
+
+            OnEntitiesChanged?.Invoke(new ReadonlyEntitiesTransaction(transaction));
+            return Task.CompletedTask;
         }
 
         #endregion
 
         #region Private
 
-        private readonly List<IEntity> _Entities = new List<IEntity>();
-
-        private IEntitiesProvider _EntitiesProvider;
+        private readonly HashSet<IEntity> _Entities = new HashSet<IEntity>();
 
         #endregion
     }

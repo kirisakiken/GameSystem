@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
+
+using KirisakiTechnologies.GameSystem.Scripts.Factories;
 using KirisakiTechnologies.GameSystem.Scripts.Modules;
 using KirisakiTechnologies.GameSystem.Scripts.Providers;
 
@@ -52,6 +53,28 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Extensions
                 throw new ArgumentNullException(nameof(self));
 
             return self.GetOptionalProvider(typeof(T)) as T;
+        }
+
+        /// <summary>
+        ///     Gets and returns given type of game factory. Throws if fails to find
+        /// </summary>
+        public static T GetFactory<T>(this IGameSystem self) where T : class, IGameFactory
+        {
+            if (self == null)
+                throw new ArgumentNullException(nameof(self));
+
+            return (self.GetFactory(typeof(T)) as T)!;
+        }
+
+        /// <summary>
+        ///     Gets and returns given type of game factory. Returns null if fails to find
+        /// </summary>
+        public static T GetOptionalFactory<T>(this IGameSystem self) where T : class, IGameFactory
+        {
+            if (self == null)
+                throw new ArgumentNullException(nameof(self));
+
+            return self.GetOptionalFactory(typeof(T)) as T;
         }
     }
 }
