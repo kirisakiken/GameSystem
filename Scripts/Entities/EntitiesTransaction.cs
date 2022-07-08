@@ -16,4 +16,33 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Entities
 
         #endregion
     }
+
+    public readonly struct ReadonlyEntitiesTransaction
+    {
+        #region Constructors
+
+        public ReadonlyEntitiesTransaction(EntitiesTransaction transaction)
+        {
+            AddedEntities = transaction.AddedEntities;
+            ModifiedEntities = transaction.ModifiedEntities;
+            RemovedEntities = transaction.RemovedEntities;
+        }
+
+        public ReadonlyEntitiesTransaction(IReadOnlyList<IEntity> addedEntities, IReadOnlyList<IEntity> modifiedEntities, IReadOnlyList<IEntity> removedEntities)
+        {
+            AddedEntities = addedEntities;
+            ModifiedEntities = modifiedEntities;
+            RemovedEntities = removedEntities;
+        }
+
+        #endregion
+
+        #region Public
+
+        public IReadOnlyList<IEntity> AddedEntities { get; }
+        public IReadOnlyList<IEntity> ModifiedEntities { get; }
+        public IReadOnlyList<IEntity> RemovedEntities { get; }
+
+        #endregion
+    }
 }

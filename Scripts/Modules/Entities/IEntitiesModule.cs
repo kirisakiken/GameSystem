@@ -4,7 +4,7 @@ using KirisakiTechnologies.GameSystem.Scripts.Entities;
 
 namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 {
-    public delegate void OnEntitiesChanged(IEntity entity);
+    public delegate void OnEntitiesChanged(ReadonlyEntitiesTransaction transaction);
 
     /// <summary>
     ///     Holds ownership of entities

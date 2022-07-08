@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using KirisakiTechnologies.GameSystem.Scripts.Entities;
-using KirisakiTechnologies.PhoenixNetworking.Scripts.Entities.Player;
+
 using UnityEngine;
 
 namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
@@ -41,8 +41,6 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
                     Debug.LogWarning($"Entity with id: {entity.Id} already exists in the module collection!");
                     continue;
                 }
-
-                OnEntitiesChanged?.Invoke(entity);
             }
 
             foreach (var entity in transaction.ModifiedEntities)
@@ -53,12 +51,15 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
             foreach (var entity in transaction.RemovedEntities)
             {
                 if (!_Entities.Contains(entity))
+                {
+                    Debug.LogWarning($"Unable to find Entity with id: {entity.Id}!");
                     continue;
+                }
 
                 _Entities.Remove(entity);
-                OnEntitiesChanged?.Invoke(entity);
             }
 
+            OnEntitiesChanged?.Invoke(new ReadonlyEntitiesTransaction(transaction));
             return Task.CompletedTask;
         }
 
