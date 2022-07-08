@@ -7,6 +7,7 @@ using KirisakiTechnologies.GameSystem.Scripts.Providers.Entities;
 
 namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 {
+    // TODO: this is shared between Server<>Client. Find a way to separate. (e.g. have multiple entities module, ServerEntitiesModule, ClientEntitiesModule) or (e.g. Separate repos)
     public class EntitiesModule : GameModuleBaseMono, IEntitiesModule
     {
         #region IEntitiesModule Implementation
