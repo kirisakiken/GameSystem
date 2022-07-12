@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,6 +14,7 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
         #region IEntitiesModule Implementation
 
         public event OnEntitiesChanged OnEntitiesChanged;
+        public event OnEntityModified OnEntityModified;
 
         public T GetEntity<T>(int id) where T : IEntity
         {
@@ -45,7 +45,8 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 
             foreach (var entity in transaction.ModifiedEntities)
             {
-                throw new NotImplementedException();
+                OnEntityModified?.Invoke(entity); // TODO: sub to it from sub entity modules (e.g. PlayerEntitiesModule, PlayerSkillEntitiesModule, NpcEntitiesModule)
+                Debug.LogWarning("Modified entities implementation is not completed");
             }
 
             foreach (var entity in transaction.RemovedEntities)

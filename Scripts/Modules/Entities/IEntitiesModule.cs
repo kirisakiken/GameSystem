@@ -5,6 +5,7 @@ using KirisakiTechnologies.GameSystem.Scripts.Entities;
 namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 {
     public delegate void OnEntitiesChanged(ReadonlyEntitiesTransaction transaction);
+    public delegate void OnEntityModified(IEntity entity);
 
     /// <summary>
     ///     Holds ownership of entities
@@ -15,6 +16,8 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
         ///     Invoked whenever an entity added, modified or removed
         /// </summary>
         event OnEntitiesChanged OnEntitiesChanged;
+
+        event OnEntityModified OnEntityModified;
 
         /// <summary>
         ///     Returns requested entity by id
