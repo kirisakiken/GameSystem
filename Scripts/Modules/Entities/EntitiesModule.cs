@@ -45,7 +45,8 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 
             foreach (var entity in transaction.ModifiedEntities)
             {
-                OnEntityModified?.Invoke(entity); // TODO: sub to it from sub entity modules (e.g. PlayerEntitiesModule, PlayerSkillEntitiesModule, NpcEntitiesModule)
+                // TODO: sub to it from sub entity modules in order to modify different types of entities without adding dependency into this module (e.g. PlayerEntitiesModule, PlayerSkillEntitiesModule, NpcEntitiesModule)
+                OnEntityModified?.Invoke(entity);
                 Debug.LogWarning("Modified entities implementation is not completed");
             }
 
