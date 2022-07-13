@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using KirisakiTechnologies.GameSystem.Scripts.Entities;
-
-using UnityEngine;
 
 namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 {
@@ -18,9 +17,14 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 
         public T GetEntity<T>(int id) where T : IEntity
         {
-            return _Entities.FirstOrDefault((e) => e.Id == id) is T t
-                ? t
-                : default;
+            if (!_Entities.ContainsKey(id))
+                return default;
+
+            var entity = _Entities[id];
+            if (!(entity is T t))
+                throw new Exception($"Unable to cast Entity[{id}] to type: {nameof(T)}");
+
+            return t;
         }
 
         public int GetNextEntityId()
@@ -28,37 +32,34 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
             if (_Entities.Count == 0)
                 return 1;
 
-            var id = _Entities.Max((e) => e.Id);
-            return id + 1;
+            var keys = _Entities.Keys;
+            return keys.Max() + 1;
         }
 
         public Task UpdateEntities(EntitiesTransaction transaction)
         {
             foreach (var entity in transaction.AddedEntities)
             {
-                if (!_Entities.Add(entity))
-                {
-                    Debug.LogWarning($"Entity with id: {entity.Id} already exists in the module collection!");
-                    continue;
-                }
+                if (_Entities.ContainsKey(entity.Id))
+                    throw new Exception($"Entity[{entity.Id}] already exists in collection {nameof(_Entities)}");
+
+                _Entities.Add(entity.Id, entity);
             }
 
             foreach (var entity in transaction.ModifiedEntities)
             {
-                // TODO: sub to it from sub entity modules in order to modify different types of entities without adding dependency into this module (e.g. PlayerEntitiesModule, PlayerSkillEntitiesModule, NpcEntitiesModule)
-                OnEntityModified?.Invoke(entity);
-                Debug.LogWarning("Modified entities implementation is not completed");
+                if (!_Entities.ContainsKey(entity.Id))
+                    throw new Exception($"Unable to find Entity[{entity.Id}] in collection {nameof(_Entities)}");
+
+                _Entities[entity.Id] = entity;
             }
 
             foreach (var entity in transaction.RemovedEntities)
             {
-                if (!_Entities.Contains(entity))
-                {
-                    Debug.LogWarning($"Unable to find Entity with id: {entity.Id}!");
-                    continue;
-                }
+                if (!_Entities.ContainsKey(entity.Id))
+                    throw new Exception($"Unable to find Entity[{entity.Id}] in collection {nameof(_Entities)}");
 
-                _Entities.Remove(entity);
+                _Entities.Remove(entity.Id);
             }
 
             OnEntitiesChanged?.Invoke(new ReadonlyEntitiesTransaction(transaction));
@@ -69,7 +70,7 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Modules.Entities
 
         #region Private
 
-        private readonly HashSet<IEntity> _Entities = new HashSet<IEntity>();
+        private readonly Dictionary<int, IEntity> _Entities = new Dictionary<int, IEntity>();
 
         #endregion
     }
