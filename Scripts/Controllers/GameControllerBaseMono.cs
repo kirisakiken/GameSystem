@@ -6,8 +6,6 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Controllers
 {
     public abstract class GameControllerBaseMono : MonoBehaviour, IGameController
     {
-        #region IGameFactory Implementation
-
         public virtual void Initialize(IGameSystem gameSystem)
         {
             if (gameSystem == null)
@@ -19,7 +17,5 @@ namespace KirisakiTechnologies.GameSystem.Scripts.Controllers
             if (gameSystem == null)
                 throw new ArgumentNullException(nameof(gameSystem));
         }
-
-        #endregion
     }
 }
