@@ -4,18 +4,6 @@ using UnityEngine;
 
 namespace KirisakiTechnologies.GameSystem.Scripts.Controllers
 {
-    public abstract class GameControllerBaseMono : MonoBehaviour, IGameController
-    {
-        public virtual void Initialize(IGameSystem gameSystem)
-        {
-            if (gameSystem == null)
-                throw new ArgumentNullException(nameof(gameSystem));
-        }
-
-        public virtual void Begin(IGameSystem gameSystem)
-        {
-            if (gameSystem == null)
-                throw new ArgumentNullException(nameof(gameSystem));
-        }
-    }
+    // TODO: find proper way to initialize begin controllers using game system arc
+    public abstract class GameControllerBaseMono : MonoBehaviour, IGameController { }
 }
